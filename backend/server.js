@@ -1,7 +1,7 @@
 const express = require("express"),
-       app = express(),
-       port = process.env.PORT || 8080,
-       cors = require("cors");
+    app = express(),
+    port = process.env.PORT || 8080,
+    cors = require("cors");
 const bodyParser = require('body-parser');
 const fsPromises = require("fs").promises;
 const todoDBName = "tododb";
@@ -24,7 +24,7 @@ app.get("/", (request, response) => {
 //add new item to json file
 app.post("/add/item", addItem)
 
-async function addItem (request, response) {
+async function addItem(request, response) {
     try {
         // Converting Javascript object (Task Item) to a JSON string
         const id = request.body.jsonObject.id
@@ -32,23 +32,25 @@ async function addItem (request, response) {
         const curDate = request.body.jsonObject.currentDate
         const dueDate = request.body.jsonObject.dueDate
         const newTask = {
-          ID: id,
-          Task: task,
-          Current_date: curDate,
-          Due_date: dueDate
+            ID: id,
+            Task: task,
+            Current_date: curDate,
+            Due_date: dueDate
         }
-        
+
         if (useCloudant) {
             //begin here for cloudant
+            var data = await fsPromises.readFile("database.json");
+            response.json(JSON.parse(data));
 
-            
+
         } else {
             //write to local file
             const data = await fsPromises.readFile("database.json");
             const json = JSON.parse(data);
             json.push(newTask);
             await fsPromises.writeFile("database.json", JSON.stringify(json))
-            console.log('Successfully wrote to file') 
+            console.log('Successfully wrote to file')
         }
         response.sendStatus(200)
     } catch (err) {
@@ -59,15 +61,20 @@ async function addItem (request, response) {
 
 //** week 6, get all items from the json database*/
 app.get("/get/items", getItems)
-async function getItems (request, response) {
+async function getItems(request, response) {
     //begin here
 
 };
 
 //** week 6, search items service */
-app.get("/get/searchitem", searchItems) 
-async function searchItems (request, response) {
+app.get("/get/searchitem", searchItems)
+async function searchItems(request, response) {
     //begin here
+    var searchField = request.query.taskname;
+    var json = JSON.parse(await fsPromises.readFile("database.json"));
+    var returnData = json.filter(jsondata => jsondata.Task === searchField);
+    response.json(returnData);
+
 
 };
 
